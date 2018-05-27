@@ -1,6 +1,9 @@
 import java.io.*;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -153,16 +156,16 @@ public class LibraryManagementSystem {
 		}
 		return hasil;
 	}
-	
+
 	public static int cariMember(String namaMember) {
-		int hasil = -1;
+		int hasilCari = -1;
 		for (int baris = 0; baris < totalMember; baris++) {
-			if (dataBuku[baris][2].compareToIgnoreCase(namaMember) == 0) {
-				hasil = baris;
+			if (dataMember[baris][1].compareToIgnoreCase(namaMember) == 0) {
+				hasilCari = baris;
 				break;
 			}
 		}
-		return hasil;
+		return hasilCari;
 	}
 
 	public static void peminjamanBuku(String namaBuku) {
@@ -195,14 +198,14 @@ public class LibraryManagementSystem {
 	}
 
 	public static void tglPeminjamandanPengembalian() {
-		Date peminjaman = new Date();
+		Date peminjamanan = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd MMMM yyyy");
-		System.out.println("Tanggal Peminjaman : " + sdf.format(peminjaman));
+		System.out.println("Tanggal Peminjaman : " + sdf.format(peminjamanan));
 
 		Calendar cl = Calendar.getInstance();
 		cl.add(Calendar.DATE, 21);
-		Date pengembalian = cl.getTime();
-		System.out.println("Tanggal Pengembalian : " + sdf.format(pengembalian));
+		Date pengembalianBuku = cl.getTime();
+		System.out.println("Tanggal Pengembalian : " + sdf.format(pengembalianBuku));
 	}
 
 	public static void inputMember() {
@@ -244,10 +247,11 @@ public class LibraryManagementSystem {
 		System.out.println("1. Menambahkan Buku");
 		System.out.println("2. Menampilkan Buku");
 		System.out.println("3. Mencari Buku");
-		System.out.println("4. Menambahkan Member");
-		System.out.println("5. Menampilkan Member");
-		System.out.println("6. Meminjam Buku");
-		System.out.println("7. Mengembalikan Buku");
+		System.out.println("4. Mencari Member");
+		System.out.println("5. Menambahkan Member");
+		System.out.println("6. Menampilkan Member");
+		System.out.println("7. Meminjam Buku");
+		System.out.println("8. Mengembalikan Buku");
 		System.out.println();
 		System.out.print("Pilih Salah Satu Menu : ");
 		int pilihMenu = in.nextInt();
@@ -294,6 +298,25 @@ public class LibraryManagementSystem {
 				menu();
 			}
 		} else if (pilihMenu == 4) {
+			System.out.print("Masukkan Nama Member : ");
+			in.nextLine();
+			String tampil = in.nextLine();
+			int hasilCari = cariMember(tampil);
+			if (hasilCari < 0) {
+				System.out.println("Maaf nama member yang anda cari tidak ada");
+			} else {
+				System.out.println();
+				System.out.println("Berikut data member yang anda cari : ");
+				System.out.println(Arrays.toString(dataMember[hasilCari]));
+			}
+			System.out.println();
+			System.out.println("Apakah anda ingin kembali ke menu ? (1.Ya 2.Tidak)");
+			System.out.print("=>");
+			int kembali = in.nextInt();
+			if (kembali == 1) {
+				menu();
+			}
+		} else if (pilihMenu == 5) {
 			inputMember();
 			tampilMember();
 			simpanDataMember();
@@ -305,7 +328,7 @@ public class LibraryManagementSystem {
 				menu();
 			}
 
-		} else if (pilihMenu == 5) {
+		} else if (pilihMenu == 6) {
 			tampilMember();
 			System.out.println();
 			System.out.println("Apakah anda ingin kembali ke menu ? (1.Ya 2.Tidak)");
@@ -315,12 +338,20 @@ public class LibraryManagementSystem {
 				menu();
 			}
 
-		} else if (pilihMenu == 6) {
+		} else if (pilihMenu == 7) {
 			System.out.print("Masukkan Judul buku yang dipinjam : ");
 			in.nextLine();
 			String pinjam = in.nextLine();
 			System.out.print("Masukkan Nama Member : ");
 			String peminjam = in.nextLine();
+			int hasilCari = cariMember(peminjam);
+			if (hasilCari < 0) {
+				System.out.println("Maaf nama anda belum terdaftar di anggota member");
+				System.out.println();
+				System.out.println("Silahkan mengisi data dibawah ini");
+				inputMember();
+				simpanDataMember();
+			}
 			peminjamanBuku(pinjam);
 			tglPeminjamandanPengembalian();
 			System.out.println();
@@ -334,16 +365,37 @@ public class LibraryManagementSystem {
 				menu();
 			}
 
-		} else if (pilihMenu == 7) {
-			System.out.print("Masukkan Judul buku yang dipinjam : ");
-			in.nextLine();
-			String pengembalian = in.nextLine();
-			System.out.print("Masukkan Nama Member : ");
-			String peminjam = in.nextLine();
-			pengembalianBuku(pengembalian);
-			tglPeminjamandanPengembalian();
-			System.out.println();
-			System.out.println("Terima kasih sudah mengembalikan buku " + pengembalian);
+		} else if (pilihMenu == 8) {
+			try {
+				System.out.print("Masukkan Nama Buku : ");
+				in.nextLine();
+				String bukuYangDipinjam = in.nextLine();
+				System.out.print("Masukkan Nama Member : ");
+				String peminjam = in.nextLine();
+				System.out.print("Masukkan Tanggal Pengembalian(dd-MM-yyyy) : ");
+				String peminjaman = in.nextLine();
+				DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+				Date awal = (Date) df.parse(peminjaman);
+				System.out.print("Masukkan Tanggal Sekarang (dd-MM-yyyy) : ");
+				String pengembalian = in.nextLine();
+				Date akhir = (Date) df.parse(pengembalian);
+
+				long jarakHari = Math.abs(akhir.getTime() - awal.getTime());
+
+				if (TimeUnit.MILLISECONDS.toDays(jarakHari) > 0) {
+					double denda = (double) (TimeUnit.MILLISECONDS.toDays(jarakHari) * 500);
+					System.out.println();
+					System.out.println("Terima kasih anda telah mengembalikan buku " + bukuYangDipinjam);
+					System.out.println("Mohon maaf karena anda terlambat anda terkena denda sebesar : Rp " + denda);
+				} else {
+					System.out.println("Terima kasih anda telah mengembalikan buku " + bukuYangDipinjam);
+					System.out.println("Terima kasih telah mengembalikan buku tepat waktu");
+				}
+				pengembalianBuku(bukuYangDipinjam);
+
+			} catch (ParseException e) {
+
+			}
 			System.out.println();
 			System.out.println("Apakah anda ingin kembali ke menu ? (1.Ya 2.Tidak)");
 			System.out.print("=>");
