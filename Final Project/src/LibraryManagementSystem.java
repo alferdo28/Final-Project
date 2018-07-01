@@ -381,6 +381,7 @@ public class LibraryManagementSystem {
 			}
 			simpanDataPinjam();
 			loadPinjam();
+			peminjamanBuku(Integer.parseInt(pinjamBuku[1]),Integer.parseInt(pinjamBuku[3]));
 			System.out.println();
 			System.out.print("Sukses pinjam buku ");
 			for (int n = 0; n < totalBuku; n++) {
@@ -407,11 +408,16 @@ public class LibraryManagementSystem {
 		int idMember = in.nextInt();
 		System.out.println("Menampilkan data peminjaman oleh member id " + idMember);
 		int kembali = -1;
-
+		System.out.println();
+		System.out.printf("%-3s| %-7s| %-9s| %-11s| %-20s| %-12s| %-20s| %-18s| %-18s| %n", "no", "id Buku",
+				"id Member", "Jumlah Buku", "Tanggal Peminjaman", "Waktu Pinjam", "Tanggal Pengembalian", "Waktu pengembalian",
+				"Status kembali");
+		System.out.println(
+				"---------------------------------------------------------------------------------------------------------------------------------------");
 		for (int i = 0; i < totalPinjam; i++) {
 			if ((dataPeminjaman[i][1].compareToIgnoreCase(String.valueOf(idBuku)) == 0)
 					&& (dataPeminjaman[i][2].compareToIgnoreCase(String.valueOf(idMember)) == 0)) {
-				System.out.printf("%-3s| %-18s| %-18s| %-18s| %-18s| %-10s| %-15s| %-15s| %-18s| %n",
+				System.out.printf("%-3s| %-7s| %-9s| %-11s| %-20s| %-12s| %-20s| %-18s| %-18s| %n",
 						dataPeminjaman[i][0], pemotonganKarakter(dataPeminjaman[i][1], 18),
 						pemotonganKarakter(dataPeminjaman[i][2], 18), pemotonganKarakter(dataPeminjaman[i][3], 18),
 						pemotonganKarakter(dataPeminjaman[i][4], 18), dataPeminjaman[i][5], dataPeminjaman[i][6],
@@ -429,8 +435,8 @@ public class LibraryManagementSystem {
 		} else {
 
 			System.out.println("Detail pengembalian buku : ");
-			System.out.println("Nama buku : " + idBuku);
-			System.out.println("Dipinjam oleh : " + idMember);
+			System.out.println("Nama buku : " + dataBuku[3][idBuku]);
+			System.out.println("Dipinjam oleh : " + dataMember[idMember][1]);
 			System.out.println("Tanggal pinjam : " + dataPeminjaman[kembali][4]);
 			System.out.println("Tanggal kembali : " + dataPeminjaman[kembali][6]);
 			System.out.println("Denda yang harus dibayar : " + hitungDenda(dataPeminjaman[kembali][6]));
@@ -442,6 +448,7 @@ public class LibraryManagementSystem {
 				dataPeminjaman[kembali][8] = "true";
 				simpanDataPinjam();
 				loadPinjam();
+				pengembalianBuku(Integer.parseInt(dataPeminjaman[kembali][1]),Integer.parseInt(dataPeminjaman[kembali][3]));
 				System.out.println("Pengembalian sukses ");
 			} else {
 				System.out.println("Anda tidak bisa meminjam buku jika masih ada buku yang belum dikembalikan ");
@@ -469,6 +476,16 @@ public class LibraryManagementSystem {
 		}
 		return hasilCari;
 	}
+	
+	
+	/**
+	 * Method ini digunakan untuk input dari keyboard dan mengembalikan nilai String
+	 * @return String yang diinput dari keyboard
+	 */
+    public static String input() {
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine();
+    }
 
 	/**
 	 * Method ini digunakan untuk mengecek suatu keberadaan stok buku pada array
@@ -496,7 +513,6 @@ public class LibraryManagementSystem {
 
 	/**
 	 * Method ini digunakan untuk menghapus data buku dalam DataBuku.csv
-	 * 
 	 * @param buku1
 	 *            id dari buku
 	 */
@@ -614,16 +630,17 @@ public class LibraryManagementSystem {
 	/**
 	 * Method ini digunakan dalam meminjam buku dengan mengurangi nilai stok buku
 	 * apabila ada buku yang terpinjam
-	 * 
 	 * @param namaBuku
-	 *            id buku yang dipinjam
+	 * 				id buku yang dipinjam
+	 * @param banyakBuku
+	 * 				stok buku yang dipinjam
 	 */
-	public static void peminjamanBuku(int namaBuku) {
+	public static void peminjamanBuku(int namaBuku, int banyakBuku) {
 		int stock = 0;
 		for (int baris = 0; baris < totalBuku; baris++) {
 			if (Integer.parseInt(dataBuku[baris][0]) == namaBuku) {
 				stock = Integer.parseInt(dataBuku[baris][8]);
-				stock--;
+				stock = stock-banyakBuku;
 				dataBuku[baris][8] = String.valueOf(stock);
 				simpanDataBuku();
 
@@ -636,16 +653,17 @@ public class LibraryManagementSystem {
 	/**
 	 * Method ini digunakan dalam mengembalikan buku dengan menambah stok buku
 	 * apabila ada buku yang dikembalikan
-	 * 
 	 * @param buku
-	 *            id buku yang dikembalikan
+	 * 			id buku yang dikembalikan
+	 * @param jumlah
+	 * 			stok buku yang dikembalikan
 	 */
-	public static void pengembalianBuku(int buku) {
+	public static void pengembalianBuku(int buku,int jumlah) {
 		int stock = 0;
 		for (int baris = 0; baris < totalBuku; baris++) {
 			if (Integer.parseInt(dataBuku[baris][0]) == buku) {
 				stock = Integer.parseInt(dataBuku[baris][8]);
-				stock++;
+				stock = stock + jumlah;
 				dataBuku[baris][8] = String.valueOf(stock);
 				simpanDataBuku();
 				break;
@@ -667,7 +685,6 @@ public class LibraryManagementSystem {
 		} else {
 			no = Integer.parseInt(dataMember[totalMember - 1][0]) + 1;
 		}
-		in.nextLine();
 		Member[0] = String.valueOf(no);
 		System.out.print("Nama : ");
 		Member[1] = in.nextLine();
@@ -678,7 +695,7 @@ public class LibraryManagementSystem {
 		System.out.print("Alamat : ");
 		Member[4] = in.nextLine();
 		System.out.print("Asal Sekolah/Institusi : ");
-		Member[5] = in.next();
+		Member[5] = in.nextLine();
 
 		for (int i = 0; i < dataMember.length; i++) {
 			if (dataMember[i][0] == null) {
